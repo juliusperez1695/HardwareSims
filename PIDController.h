@@ -16,6 +16,7 @@ class PIDController{
         double Kp, Ki, Kd;
 
         // Constructor
+        PIDController();
         PIDController(double Kp, double Ki, double Kd);
 
         // Destructor

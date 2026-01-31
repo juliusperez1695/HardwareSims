@@ -8,6 +8,12 @@ Description: Definition of the PIDController class
 
 #include "PIDController.h"
 
+PIDController :: PIDController(){
+    this->Kp = 15.0;
+    this->Ki = 0.0;
+    this->Kd = 7.0;
+}
+
 PIDController :: PIDController(double Kp, double Ki, double Kd){
     this->Kp = Kp;
     this->Ki = Ki;
