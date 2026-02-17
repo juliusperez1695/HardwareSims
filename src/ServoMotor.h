@@ -10,6 +10,7 @@ Description: Header file for declaring the ServoMotor class
 #define SERVOMOTOR_H
 
 #include <vector>
+#include <string>
 #include "DCMotor.h"
 #include "PIDController.h"
 
@@ -29,8 +30,10 @@ class ServoMotor {
 
         // Mutators
         void set_position_state(double setpoint_rad, double sim_time, double dt);
+        void set_label(std::string in_label);
 
     private:
+        std::string label = "Servo";
         double pos_state_rad = 0.0;
         double time_elapsed = 0.0;
         bool is_rotating = false;
