@@ -25,7 +25,7 @@ int main(){
     std::vector<std::thread> thread_pool;
 
     unsigned int n = std::thread::hardware_concurrency();
-    std::cout << n << " concurrent threads are being supported by the hardware." << std::endl;
+    std::cout << n << " Logical Processors available." << std::endl;
 
     for(int i = 0; i < motor_set.size(); i++){
         thread_pool.emplace_back(

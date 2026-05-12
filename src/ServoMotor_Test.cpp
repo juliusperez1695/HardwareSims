@@ -25,15 +25,15 @@ int main(void){
     t_vals = motor.get_t_record();
     pos_vals = motor.get_pos_record();
 
-    // Plot2D plot;
+    Plot2D plot;
+    plot.size(1600, 1200);
+    plot.xlabel("Time (s)");
+    plot.ylabel("Angular Position (rad)");
+    plot.drawCurve(t_vals, pos_vals).label("Motor Position");
+    plot.legend().atOutsideBottom().displayHorizontal();
+    Figure fig = {{plot}};
+    Canvas canv = {{fig}};
+    canv.show();
     
-    // plot.xlabel("Time (s)");
-    // plot.ylabel("Angular Position (rad)");
-    // plot.drawCurve(t_vals, pos_vals).label("Motor Position");
-    // plot.legend().atOutsideBottom().displayHorizontal();
-    // Figure fig = {{plot}};
-    // Canvas canv = {{fig}};
-    // canv.show();
-
     return 0;
 }
