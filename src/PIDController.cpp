@@ -31,7 +31,7 @@ void PIDController :: sample_error(double error, double sample_time){
 }
 
 void PIDController :: generate_output(void){
-    // Calculates the control output for each time step 'dt' using the sampled position error
+    // Calculates the control output for each time step 'dt' using the sampled error
 
     // Integral Term
     integrated_error += sampled_error;

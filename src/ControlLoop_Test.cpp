@@ -17,23 +17,23 @@ using namespace sciplot;
 
 int main(void){
 
-    double Kp = 15.0;
-    double Ki = 0.0;
-    double Kd = 7.0;
+    double Kp = 24.5;
+    double Ki = 0.05;
+    double Kd = 0.0;
     PIDController pid_ctrlr(Kp, Ki, Kd);
     DCMotor motor1;
     vector<double> t_vals, curr_vals, vel_vals, pos_vals;
 
-    double cmd_pos = 3.0;
-    double sim_time = 5;
-    double dt = 0.01;
+    double cmd_curr = 2.0;
+    double sim_time = 1;
+    double dt = 0.001;
 
     // simulated time and feedback loop
     for(double t = 0.0; t < sim_time; t += dt){
         double meas_pos = motor1.get_position();
         double meas_vel = motor1.get_velocity();
         double meas_curr = motor1.get_current();
-        double error = cmd_pos - meas_pos;
+        double error = cmd_curr - meas_curr;
 
         pid_ctrlr.sample_error(error, dt);
         motor1.set_input_volts(pid_ctrlr.get_pid_output(), dt);
@@ -52,6 +52,9 @@ int main(void){
     plot4.legend().atOutsideBottom().displayHorizontal();
     Figure fig1 = {{plot4}};
     Canvas canv1 = {{fig1}};
+    vector<double>::iterator max_iter = max_element(curr_vals.begin(), curr_vals.end());
+    double max_curr = *max_iter;
+    cout << "Max. Current = " << max_curr << endl;
     canv1.show();
 
     plot5.xlabel("Time (s)");
@@ -68,9 +71,9 @@ int main(void){
     plot6.legend().atOutsideBottom().displayHorizontal();
     Figure fig3 = {{plot6}};
     Canvas canv3 = {{fig3}};
-    vector<double>::iterator max_iter = max_element(pos_vals.begin(), pos_vals.end());
+    /*vector<double>::iterator max_iter = max_element(pos_vals.begin(), pos_vals.end());
     double max_pos = *max_iter;
-    cout << "Max. Position = " << max_pos << endl;
+    cout << "Max. Position = " << max_pos << endl;*/
     canv3.show();
 
     return 0;

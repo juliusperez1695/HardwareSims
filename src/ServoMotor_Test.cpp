@@ -1,14 +1,19 @@
+
+#include <iostream>
 #include <vector>
 #include <thread>
 #include <sciplot/sciplot.hpp>
 #include "ServoMotor.h"
 
+using namespace std;
 using namespace sciplot;
 
 int main(void){
     ServoMotor motor;
     std::vector<double> t_vals, pos_vals;
 
+    std::cout << "Running Servo Motor simulation . . . ";
+    
     std::thread write_thread(
         &ServoMotor::set_position_state, 
         &motor, 
@@ -32,6 +37,9 @@ int main(void){
     plot.drawCurve(t_vals, pos_vals).label("Motor Position");
     plot.legend().atOutsideBottom().displayHorizontal();
     Figure fig = {{plot}};
+    vector<double>::iterator max_iter = max_element(pos_vals.begin(), pos_vals.end());
+    double max_pos = *max_iter;
+    cout << "Max. Position = " << max_pos << endl;
     Canvas canv = {{fig}};
     canv.show();
     

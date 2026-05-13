@@ -34,8 +34,8 @@ bool write_complete = false;
 ServoMotor :: ServoMotor() {
     // Definition of constructor
     this->motor = DCMotor();
-    this->ctrlr = PIDController(15.0, 0.0, 7.0);
-    //this->ctrlr = PIDController(6.0, 0.0005, 0.0);
+    this->pos_ctrlr = PIDController(15.0, 0.0, 3.0);
+    this->curr_ctrlr = PIDController(24.5, 0.05, 0.0);
 }
 
 ServoMotor :: ~ServoMotor() {
@@ -81,31 +81,36 @@ double ServoMotor :: get_position_state(void) {
         while(!write_complete){
 
             // Thread: Vector-copy of t_record and pos_record for plotting
-            std::vector<double> t_batch, pos_batch;
+            std::vector<double> t_batch, pos_batch, t_copy, pos_copy;
             {
                 // Release lock and wait until lambda condition has been met
                 std::unique_lock<std::mutex> lock(mtx);
                 cv.wait(lock, []() { return notified || write_complete; });
 
                 // Simulation fills the record which acts as a data buffer, then the plotter clears the buffer via "move"
-                t_batch = std::move(t_record);
-                pos_batch = std::move(pos_record);
+                // t_batch = std::move(t_record);
+                // pos_batch = std::move(pos_record);
+
+                // Still an issue where simulation plot doesn't appear occasionally
+                // - Need this to replot at the end
+                t_copy = t_record;
+                pos_copy = pos_record;
                 notified = false;
 
                 if (write_complete) break;
             }
             
             // Append batches to master history
-            t_history.insert(t_history.end(), t_batch.begin(), t_batch.end());
-            pos_history.insert(pos_history.end(), pos_batch.begin(), pos_batch.end());
+            // t_history.insert(t_history.end(), t_batch.begin(), t_batch.end());
+            // pos_history.insert(pos_history.end(), pos_batch.begin(), pos_batch.end());
 
             // Plot position record
-            if (!t_history.empty()) {
+            if (!t_copy.empty()) {
                 std::string plot_str = "plot '-' with points title '" + this->label + " Position' pt 7 ps 1 lc rgb 'blue'\n";
 
                 fprintf(pipe, plot_str.c_str());
-                for (size_t j = 0; j < t_history.size(); ++j) {
-                    fprintf(pipe, "%f %f\n", t_history[j], pos_history[j]);
+                for (size_t j = 0; j < t_copy.size(); ++j) {
+                    fprintf(pipe, "%f %f\n", t_copy[j], pos_copy[j]);
                 }
                 fprintf(pipe, "%f %f\n", time_elapsed, pos_state_rad); // Example data point
                 fprintf(pipe, "e\n"); // End of data for current plot
@@ -147,10 +152,17 @@ void ServoMotor :: set_position_state(double setpoint_rad, double sim_time, doub
             double meas_pos = motor.get_position();
             double meas_vel = motor.get_velocity();
             double meas_curr = motor.get_current();
-            double error = setpoint_rad - meas_pos;
 
-            ctrlr.sample_error(error, dt);
-            motor.set_input_volts(ctrlr.get_pid_output(), dt);
+            // Begin position control loop
+            double pos_error = setpoint_rad - meas_pos;
+            pos_ctrlr.sample_error(pos_error, dt);
+
+            // Output of position PID is the reference to the current control loop
+            double curr_error = pos_ctrlr.get_pid_output() - meas_curr;
+            curr_ctrlr.sample_error(curr_error, dt);
+
+            // Output of current PID supplies the driver/motor
+            motor.set_input_volts(curr_ctrlr.get_pid_output(), dt);
 
             this->pos_state_rad = meas_pos;
             this->time_elapsed = t;

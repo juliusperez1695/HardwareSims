@@ -38,7 +38,7 @@ class ServoMotor {
         double time_elapsed = 0.0;
         bool is_rotating = false;
         DCMotor motor;
-        PIDController ctrlr;
+        PIDController curr_ctrlr, pos_ctrlr;
         std::vector<double> pos_record, t_record;
 
 };
